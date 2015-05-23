@@ -1,11 +1,10 @@
 # proyecto_linux
-proyecto de "Introducción a la Administración de Sistemas GNU/Linux", ciclo 01/2015
+**proyecto de "Introducción a la Administración de Sistemas GNU/Linux", ciclo 01/2015**
 
-Introducción a la Administración de Sistemas GNU/Linux ­ ciclo 01/2015
-
-Proyecto grupal: programando en Bash
+**Proyecto grupal: programando en Bash**
 
 Introducción
+------------
 
 Un shell script es un programa que debe ser ejecutado por una consola (Bash,
 usualmente) y que contiene un conjunto de comandos con determinado fin.
@@ -20,6 +19,7 @@ diverso que va desde tareas tan cruciales como el arranque del sistema hasta
 la configuración o instalación de alguna aplicación utilitaria.
 
 Trabajo por realizar
+--------------------
 
 El proyecto consiste en elaborar un pequeño shell script en Bash, que realice
 una tarea específica de las siguientes:
@@ -53,6 +53,7 @@ Importante: cada grupo deberá elegir uno de los temas previos y notificarlo al
 profesor de la materia con copia a todos los compañeros del curso.
 
 El shell script debe incluir lo siguiente:
+------------------------------------------
 
 - Validar que todo lo que el script necesite para funcionar correctamente está
 presente en el sistema, por ejemplo, permisos de lectura o escritura sobre
@@ -102,9 +103,10 @@ y sus posibles valores.
 - Ruta del repositorio donde pueda clonarse (en el caso de optar por los
 puntos extras).
 
-Fecha de entrega: viernes 26/junio.
+**Fecha de entrega: viernes 26/junio.**
 
 Evaluación
+----------
 
 - Cada uno de los ítems listados anteriormente (validaciones, archivos de
 configuración, parámetros, generar datos y uso de logs): 2% (total 10%).
