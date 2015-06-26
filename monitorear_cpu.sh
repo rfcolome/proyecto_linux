@@ -102,6 +102,7 @@ else
   fi
   echo "SLEEP=1" > /etc/monitorear_cpu.conf
   echo "ITER=10" >> /etc/monitorear_cpu.conf
+  echo "PROCS=0" >> /etc/monitorear_cpu.conf
 fi
 
 #### FIN VALIDACIONES ####
@@ -111,12 +112,13 @@ COUNTER=0
 NUM_ITERACIONES=10
 SECS_SLEEP=1
 NUM_PROCESADORES=$(cat /proc/cpuinfo | grep 'processor' | wc -l)
+PROCESOS_A_MOSTRAR=""
 
 
 #### LECTURA DE ARCHIVO ####
 
 ARCHIVO=$(cat /etc/monitorear_cpu.conf | grep -Eo '^.+$')
-LINEAS_VALIDAS=$(echo "$ARCHIVO" | grep -Eo '^[[:space:]]*(#.*|SLEEP[[:space:]]*=[[:space:]]*[0-9]+|ITER[[:space:]]*=[[:space:]]*[0-9]+|[[:space:]]*)[[:space:]]*$')
+LINEAS_VALIDAS=$(echo "$ARCHIVO" | grep -Eo '^[[:space:]]*(#.*|SLEEP[[:space:]]*=[[:space:]]*[0-9]+|ITER[[:space:]]*=[[:space:]]*[0-9]+|PROCS[[:space:]]*=[[:space:]]*[0-9]+|[[:space:]]*)[[:space:]]*$')
 
 if [ "$ARCHIVO" != "$LINEAS_VALIDAS" ]; then
   LINEAS_INVALIDAS=$( (echo "$ARCHIVO"; echo "$LINEAS_VALIDAS") | sort | uniq --unique)
@@ -128,13 +130,22 @@ fi
 
 NUM_ITERACIONES=$(echo "$ARCHIVO" | grep -E '^[[:space:]]*ITER' | grep -Eo '[0-9]+' | tail -n 1)
 SECS_SLEEP=$(echo "$ARCHIVO" | grep -E '^[[:space:]]*SLEEP' | grep -Eo '[0-9]+' | tail -n 1)
+PROCESOS_A_MOSTRAR=$(echo "$ARCHIVO" | grep -E '^[[:space:]]*PROCS' | grep -Eo '[0-9]+' | tail -n 1)
+
+if [ -z "$NUM_ITERACIONES" ]; then
+  NUM_ITERACIONES=10
+fi
+
+if [ -z "$SECS_SLEEP" ]; then
+  SECS_SLEEP=1
+fi
+
 
 #### FIN LECTURA DE ARCHIVO ####
 
 
 
 USUARIO=""
-PROCESOS_A_MOSTRAR=""
 
 
 # las variables son utilizadas despues para decidir la manera como se va a procesar 
@@ -226,11 +237,13 @@ while [ $COUNTER -lt $NUM_ITERACIONES ]; do
   echo "CPU%: $SUMA_CPU"
 
   # si el usuario nos pidio que mostraramos los primeros N procesos, los mostramos aca con head
-  if [ -n "$PROCESOS_A_MOSTRAR" ]; then
+  if [ -n "$PROCESOS_A_MOSTRAR" ] && [ "$PROCESOS_A_MOSTRAR" -ne 0 ]; then
     echo ""
     echo "USR CPU% CMD"
     PS=$(echo "$PS_OUTPUT" | head -n "$PROCESOS_A_MOSTRAR")
     echo "$PS"
+    echo ""
+    echo ""
   fi
 
   COUNTER=$(( $COUNTER + 1 ))

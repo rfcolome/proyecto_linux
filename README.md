@@ -29,16 +29,18 @@ con ciertos parametros por defecto. Si la creacion falla, el script muestra el e
 Este archivo puede aceptar comentarios y lineas en blanco. Los comentarios inician con un
 simbolo de numeral (#) y deben ir en una linea vacia.
 
-El archivo especifica dos parametros: SLEEP e ITER. por ejemplo, un archivo de configuracion con:
+El archivo especifica tres parametros: SLEEP, ITER, y PROCS. por ejemplo, un archivo de configuracion con:
 
 ```
 # este es un comentario!
 SLEEP=1
 ITER=10
+PROCS=5
 ```
 
-indica que el programa va a mostrar el uso de CPU (aproximadamente) una vez por segundo, y que
-va a ejecutar 10 iteraciones antes de detenerse.
+indica que el programa va a mostrar el uso de CPU (aproximadamente) una vez por segundo, que
+va a ejecutar 10 iteraciones antes de detenerse, y que va a mostrar los 5 procesos que usen
+mas CPU. Si el valor de PROCS es cero, no se muestran los procesos.
 
 
 El archivo podria estar mal escrito, en cuyo caso el script muestra el error y se detiene.
@@ -48,6 +50,7 @@ Por ejemplo, si un archivo dice:
 # este es un comentario!
 SLEP=1
 ITER=10
+PROCS=0
 ```
 
 El script detecta el error y muestra el siguiente mensaje:
@@ -67,6 +70,10 @@ SLEEP=1
 ITER=2
 SLEEP=3
 ITER=5
+PROCS=1
 ```
 
-en este caso, SLEEP tendra el valor 3, e ITER el valor 5.
+en este caso, SLEEP tendra el valor 3, ITER el valor 5, y PROCS el valor de 1.
+
+si estos valores se especifican mediante la linea de comandos (con las opciones -s, -i, y -n),
+estas toman precedencia sobre los valores en el archivo de configuracion
