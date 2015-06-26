@@ -20,67 +20,67 @@
 #### VALIDACIONES ####
 
 if ! command -v cat 2>/dev/null 1>/dev/null; then
-  echo "ERROR: el comando cat no se encontro"
+  echo "ERROR: el comando cat no se encontro" 1>&2
   exit 1
 fi
 
 if ! command -v grep 2>/dev/null 1>/dev/null; then
-  echo "ERROR: el comando grep no se encontro"
+  echo "ERROR: el comando grep no se encontro" 1>&2
   exit 1
 fi
 
 if ! command -v wc 2>/dev/null 1>/dev/null; then
-  echo "ERROR: el comando wc no se encontro"
+  echo "ERROR: el comando wc no se encontro" 1>&2
   exit 1
 fi
 
 if ! command -v getopts 2>/dev/null 1>/dev/null; then
-  echo "ERROR: el comando getopts no se encontro"
+  echo "ERROR: el comando getopts no se encontro" 1>&2
   exit 1
 fi
 
 if ! command -v echo 2>/dev/null 1>/dev/null; then
-  echo "ERROR: el comando echo no se encontro"
+  echo "ERROR: el comando echo no se encontro" 1>&2
   exit 1
 fi
 
 if ! command -v while 2>/dev/null 1>/dev/null; then
-  echo "ERROR: el comando while no se encontro"
+  echo "ERROR: el comando while no se encontro" 1>&2
   exit 1
 fi
 
 if ! command -v ps 2>/dev/null 1>/dev/null; then
-  echo "ERROR: el comando ps no se encontro"
+  echo "ERROR: el comando ps no se encontro" 1>&2
   exit 1
 fi
 
 if ! command -v tail 2>/dev/null 1>/dev/null; then
-  echo "ERROR: el comando tail no se encontro"
+  echo "ERROR: el comando tail no se encontro" 1>&2
   exit 1
 fi
 
 if ! command -v awk 2>/dev/null 1>/dev/null; then
-  echo "ERROR: el comando awk no se encontro"
+  echo "ERROR: el comando awk no se encontro" 1>&2
   exit 1
 fi
 
 if ! command -v sort 2>/dev/null 1>/dev/null; then
-  echo "ERROR: el comando sort no se encontro"
+  echo "ERROR: el comando sort no se encontro" 1>&2
   exit 1
 fi
 
 if ! command -v head 2>/dev/null 1>/dev/null; then
-  echo "ERROR: el comando head no se encontro"
+  echo "ERROR: el comando head no se encontro" 1>&2
   exit 1
 fi
 
 if ! command -v sleep 2>/dev/null 1>/dev/null; then
-  echo "ERROR: el comando sleep no se encontro"
+  echo "ERROR: el comando sleep no se encontro" 1>&2
   exit 1
 fi
 
 if ! command -v touch 2>/dev/null 1>/dev/null; then
-  echo "ERROR: el comando touch no se encontro"
+  echo "ERROR: el comando touch no se encontro" 1>&2
   exit 1
 fi
 
@@ -88,7 +88,7 @@ fi
 
 if [ -a /etc/monitorear_cpu.conf ]; then
   if [ ! -r /etc/monitorear_cpu.conf ]; then
-    echo "ERROR: el archivo /etc/monitorear_cpu.conf existe pero no se puede leer"
+    echo "ERROR: el archivo /etc/monitorear_cpu.conf existe pero no se puede leer" 1>&2
     logger "ERROR: monitorear_cpu - el archivo /etc/monitorear_cpu.conf existe pero no se puede leer"
     exit 1
   fi
@@ -96,7 +96,7 @@ else
   logger "el archivo /etc/monitorear_cpu.conf no existe; creandolo"
   touch /etc/monitorear_cpu.conf
   if [ $? -ne 0 ]; then
-    echo "ERROR: el archivo /etc/monitorear_cpu.conf no se pudo crear"
+    echo "ERROR: el archivo /etc/monitorear_cpu.conf no se pudo crear" 1>&2
     logger "ERROR: monitorear_cpu - el archivo /etc/monitorear_cpu.conf no se pudo crear"
     exit 1    
   fi
@@ -120,14 +120,14 @@ LINEAS_VALIDAS=$(echo "$ARCHIVO" | grep -Eo '^[[:space:]]*(#.*|SLEEP[[:space:]]*
 
 if [ "$ARCHIVO" != "$LINEAS_VALIDAS" ]; then
   LINEAS_INVALIDAS=$( (echo "$ARCHIVO"; echo "$LINEAS_VALIDAS") | sort | uniq --unique)
-  echo "ERROR (/etc/monitorear_cpu.conf): error en las siguientes lineas"
-  echo "$LINEAS_INVALIDAS"
+  echo "ERROR (/etc/monitorear_cpu.conf): error en las siguientes lineas:" 1>&2
+  echo "$LINEAS_INVALIDAS" 1>&2
   logger "ERROR: monitorear_cpu - se detectaron errores en el archivo /etc/monitorear_cpu.conf"
   exit 1;
 fi
 
-NUM_ITERACIONES=$(echo "$ARCHIVO" | grep -E '^[[:space:]]*ITER' | grep -Eo '[0-9]+')
-SECS_SLEEP=$(echo "$ARCHIVO" | grep -E '^[[:space:]]*SLEEP' | grep -Eo '[0-9]+')
+NUM_ITERACIONES=$(echo "$ARCHIVO" | grep -E '^[[:space:]]*ITER' | grep -Eo '[0-9]+' | tail -n 1)
+SECS_SLEEP=$(echo "$ARCHIVO" | grep -E '^[[:space:]]*SLEEP' | grep -Eo '[0-9]+' | tail -n 1)
 
 #### FIN LECTURA DE ARCHIVO ####
 
