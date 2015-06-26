@@ -14,6 +14,10 @@
 #    - -i numero : indica el numero de iteraciones del comando (default: 10)
 #    - -s numero : "sleep". Indica cada cuantos segundos va a iterar y revisar el uso de CPU (default: 1)
 #    - -h        : "help". muestra la ayuda
+#
+
+
+#### VALIDACIONES ####
 
 if ! command -v cat 2>/dev/null 1>/dev/null; then
   echo "ERROR: el comando cat no se encontro"
@@ -75,17 +79,66 @@ if ! command -v sleep 2>/dev/null 1>/dev/null; then
   exit 1
 fi
 
+if ! command -v touch 2>/dev/null 1>/dev/null; then
+  echo "ERROR: el comando touch no se encontro"
+  exit 1
+fi
+
+# validando la existencia el archivo de configuracion
+
+if [ -a /etc/monitorear_cpu.conf ]; then
+  if [ ! -r /etc/monitorear_cpu.conf ]; then
+    echo "ERROR: el archivo /etc/monitorear_cpu.conf existe pero no se puede leer"
+    logger "ERROR: monitorear_cpu - el archivo /etc/monitorear_cpu.conf existe pero no se puede leer"
+    exit 1
+  fi
+else
+  logger "el archivo /etc/monitorear_cpu.conf no existe; creandolo"
+  touch /etc/monitorear_cpu.conf
+  if [ $? -ne 0 ]; then
+    echo "ERROR: el archivo /etc/monitorear_cpu.conf no se pudo crear"
+    logger "ERROR: monitorear_cpu - el archivo /etc/monitorear_cpu.conf no se pudo crear"
+    exit 1    
+  fi
+  echo "SLEEP=1" > /etc/monitorear_cpu.conf
+  echo "ITER=10" >> /etc/monitorear_cpu.conf
+fi
+
+#### FIN VALIDACIONES ####
+
 
 COUNTER=0
 NUM_ITERACIONES=10
 SECS_SLEEP=1
 NUM_PROCESADORES=$(cat /proc/cpuinfo | grep 'processor' | wc -l)
 
+
+#### LECTURA DE ARCHIVO ####
+
+ARCHIVO=$(cat /etc/monitorear_cpu.conf | grep -Eo '^.+$')
+LINEAS_VALIDAS=$(echo "$ARCHIVO" | grep -Eo '^[[:space:]]*(#.*|SLEEP[[:space:]]*=[[:space:]]*[0-9]+|ITER[[:space:]]*=[[:space:]]*[0-9]+|[[:space:]]*)[[:space:]]*$')
+
+if [ "$ARCHIVO" != "$LINEAS_VALIDAS" ]; then
+  LINEAS_INVALIDAS=$( (echo "$ARCHIVO"; echo "$LINEAS_VALIDAS") | sort | uniq --unique)
+  echo "ERROR (/etc/monitorear_cpu.conf): error en las siguientes lineas"
+  echo "$LINEAS_INVALIDAS"
+  logger "ERROR: monitorear_cpu - se detectaron errores en el archivo /etc/monitorear_cpu.conf"
+  exit 1;
+fi
+
+NUM_ITERACIONES=$(echo "$ARCHIVO" | grep -E '^[[:space:]]*ITER' | grep -Eo '[0-9]+')
+SECS_SLEEP=$(echo "$ARCHIVO" | grep -E '^[[:space:]]*SLEEP' | grep -Eo '[0-9]+')
+
+#### FIN LECTURA DE ARCHIVO ####
+
+
+
 USUARIO=""
 PROCESOS_A_MOSTRAR=""
 
 
-
+# las variables son utilizadas despues para decidir la manera como se va a procesar 
+# la salida de ps
 while getopts "u:xn:i:s:h" opt; do
   case $opt in
        u) USUARIO="$OPTARG"
@@ -97,7 +150,11 @@ while getopts "u:xn:i:s:h" opt; do
        s) SECS_SLEEP="$OPTARG"
           ;;
        h) echo ""
-          echo "monitorear_cpu.sh [OPCIONES]"
+          echo "monitorear_cpu"
+          echo "  Monitorear el uso de CPU durante un lapso de tiempo determinado"
+          echo ""
+          echo ""
+          echo "uso: monitorear_cpu.sh [OPCIONES]"
           echo ""
           echo "donde OPCIONES son:"
           echo ""
@@ -146,33 +203,29 @@ AWK_FILTER_USER='
   if ($1 == "'"$USUARIO"'") {
     print
   }
-}
-'
-
-# este script extrae el numero del campo id (idle) de la linea de top que contiene 
-# las estadisticas del CPU
-SED_SCRIPT_IDLE='
-/Cpu/ {
-  s/.* ([0-9.]+) id.*/\1/g;
-  p
 }'
 
+# repetimos el numero de iteraciones que el usuario (o el archivo de configuracion) indico
 while [ $COUNTER -lt $NUM_ITERACIONES ]; do
 
-  # $1 es el usuario, $3 es CPU%, y $11 es comando
+  # $1 es el usuario, $3 es CPU%, y $11 es el comando
   PS_OUTPUT=$(ps aux | 
                  tail --lines=+2 | 
                  awk --field-separator=' ' '{ print $1 " " $3 " " $11 }' | 
                  sort --reverse --field-separator=' ' --numeric-sort --key=2)
   
+  # si el usuario nos pidio que filtremos por usuario, usamos el script de AWK para eliminar
+  # las lineas de procesos de otros usuarios
   if [ -n "$USUARIO" ]; then
     PS_OUTPUT=$(echo "$PS_OUTPUT" | awk "$AWK_FILTER_USER")
   fi
 
+  # sumamos todos los porcentajes de CPU para obtener el uso total de CPU (dividido entre el numero de procesadores)
   SUMA_CPU=$(echo "$PS_OUTPUT" | awk "$AWK_SUM")
 
   echo "CPU%: $SUMA_CPU"
 
+  # si el usuario nos pidio que mostraramos los primeros N procesos, los mostramos aca con head
   if [ -n "$PROCESOS_A_MOSTRAR" ]; then
     echo ""
     echo "USR CPU% CMD"
@@ -180,9 +233,9 @@ while [ $COUNTER -lt $NUM_ITERACIONES ]; do
     echo "$PS"
   fi
 
-
-
   COUNTER=$(( $COUNTER + 1 ))
+
+  # esperamos el numero de segundos indicados por el usuario (o el archivo de configuracion
   sleep $SECS_SLEEP
 done
 
