@@ -15,6 +15,67 @@
 #    - -s numero : "sleep". Indica cada cuantos segundos va a iterar y revisar el uso de CPU (default: 1)
 #    - -h        : "help". muestra la ayuda
 
+if ! command -v cat 2>/dev/null 1>/dev/null; then
+  echo "ERROR: el comando cat no se encontro"
+  exit 1
+fi
+
+if ! command -v grep 2>/dev/null 1>/dev/null; then
+  echo "ERROR: el comando grep no se encontro"
+  exit 1
+fi
+
+if ! command -v wc 2>/dev/null 1>/dev/null; then
+  echo "ERROR: el comando wc no se encontro"
+  exit 1
+fi
+
+if ! command -v getopts 2>/dev/null 1>/dev/null; then
+  echo "ERROR: el comando getopts no se encontro"
+  exit 1
+fi
+
+if ! command -v echo 2>/dev/null 1>/dev/null; then
+  echo "ERROR: el comando echo no se encontro"
+  exit 1
+fi
+
+if ! command -v while 2>/dev/null 1>/dev/null; then
+  echo "ERROR: el comando while no se encontro"
+  exit 1
+fi
+
+if ! command -v ps 2>/dev/null 1>/dev/null; then
+  echo "ERROR: el comando ps no se encontro"
+  exit 1
+fi
+
+if ! command -v tail 2>/dev/null 1>/dev/null; then
+  echo "ERROR: el comando tail no se encontro"
+  exit 1
+fi
+
+if ! command -v awk 2>/dev/null 1>/dev/null; then
+  echo "ERROR: el comando awk no se encontro"
+  exit 1
+fi
+
+if ! command -v sort 2>/dev/null 1>/dev/null; then
+  echo "ERROR: el comando sort no se encontro"
+  exit 1
+fi
+
+if ! command -v head 2>/dev/null 1>/dev/null; then
+  echo "ERROR: el comando head no se encontro"
+  exit 1
+fi
+
+if ! command -v sleep 2>/dev/null 1>/dev/null; then
+  echo "ERROR: el comando sleep no se encontro"
+  exit 1
+fi
+
+
 COUNTER=0
 NUM_ITERACIONES=10
 SECS_SLEEP=1
