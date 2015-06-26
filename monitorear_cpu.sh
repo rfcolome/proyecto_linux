@@ -233,8 +233,10 @@ while [ $COUNTER -lt $NUM_ITERACIONES ]; do
 
   # sumamos todos los porcentajes de CPU para obtener el uso total de CPU (dividido entre el numero de procesadores)
   SUMA_CPU=$(echo "$PS_OUTPUT" | gawk "$GAWK_SUM")
-
+  # este comando nos muestra el monitoreo del CPU en el standar output
   echo "CPU%: $SUMA_CPU"
+   # este comando redirecciona el standar output a /var/log/monitoreo_cpu
+  echo "CPU%: $SUMA_CPU" >> /var/log/monitoreo_cpu
 
   # si el usuario nos pidio que mostraramos los primeros N procesos, los mostramos aca con head
   if [ -n "$PROCESOS_A_MOSTRAR" ] && [ "$PROCESOS_A_MOSTRAR" -ne 0 ]; then
@@ -242,6 +244,8 @@ while [ $COUNTER -lt $NUM_ITERACIONES ]; do
     echo "USR CPU% CMD"
     PS=$(echo "$PS_OUTPUT" | head -n "$PROCESOS_A_MOSTRAR")
     echo "$PS"
+    # redirecciona $PS al archivo /var/log/monitoreo_cpu 
+    echo "$PS" >> /var/log/monitoreo_cpu
     echo ""
     echo ""
   fi
