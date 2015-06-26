@@ -59,8 +59,8 @@ if ! command -v tail 2>/dev/null 1>/dev/null; then
   exit 1
 fi
 
-if ! command -v awk 2>/dev/null 1>/dev/null; then
-  echo "ERROR: el comando awk no se encontro" 1>&2
+if ! command -v gawk 2>/dev/null 1>/dev/null; then
+  echo "ERROR: el comando gawk no se encontro" 1>&2
   exit 1
 fi
 
@@ -195,7 +195,7 @@ done
 
 # script que suma todos los porcentajes de CPU
 # y muestra el resultado
-AWK_SUM='
+GAWK_SUM='
 BEGIN {
   usage = 0;
 }
@@ -209,7 +209,7 @@ END {
 }'
 
 # script que filtra de acuerdo al usuario ingresado
-AWK_FILTER_USER='
+GAWK_FILTER_USER='
 {
   if ($1 == "'"$USUARIO"'") {
     print
@@ -222,17 +222,17 @@ while [ $COUNTER -lt $NUM_ITERACIONES ]; do
   # $1 es el usuario, $3 es CPU%, y $11 es el comando
   PS_OUTPUT=$(ps aux | 
                  tail --lines=+2 | 
-                 awk --field-separator=' ' '{ print $1 " " $3 " " $11 }' | 
+                 gawk --field-separator=' ' '{ print $1 " " $3 " " $11 }' | 
                  sort --reverse --field-separator=' ' --numeric-sort --key=2)
   
-  # si el usuario nos pidio que filtremos por usuario, usamos el script de AWK para eliminar
+  # si el usuario nos pidio que filtremos por usuario, usamos el script de GAWK para eliminar
   # las lineas de procesos de otros usuarios
   if [ -n "$USUARIO" ]; then
-    PS_OUTPUT=$(echo "$PS_OUTPUT" | awk "$AWK_FILTER_USER")
+    PS_OUTPUT=$(echo "$PS_OUTPUT" | gawk "$GAWK_FILTER_USER")
   fi
 
   # sumamos todos los porcentajes de CPU para obtener el uso total de CPU (dividido entre el numero de procesadores)
-  SUMA_CPU=$(echo "$PS_OUTPUT" | awk "$AWK_SUM")
+  SUMA_CPU=$(echo "$PS_OUTPUT" | gawk "$GAWK_SUM")
 
   echo "CPU%: $SUMA_CPU"
 
